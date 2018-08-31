@@ -37,7 +37,7 @@ class PassChecker: passParams {
     }
     
     func rideSkip() {
-        if pass.passHolder.skipRides == true {
+        if pass.passHolder.skipLines == true {
             print("You may skip this line")
         }else{
             print("You shall not pass!!!!")

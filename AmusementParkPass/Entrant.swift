@@ -28,14 +28,14 @@ class Entrant: CanEnter {
     
     var entrantType: Entrants
     var rideAccess: Bool
-    var skipRides: Bool
+    var skipLines: Bool
     var areas = [ParkAreas.RideAreas]
     var discounts: Discounts?
     
     init(entrant: Entrants, rideAccess: Bool, skipRides: Bool, discounts: Discounts?) {
         self.entrantType = entrant
         self.rideAccess = rideAccess
-        self.skipRides = skipRides
+        self.skipLines = skipRides
         self.discounts = discounts
     }
 }
@@ -82,9 +82,60 @@ class Vip: Entrant {
     }
 }
 
+class SeasonPass: CanEnter {
+    var rideAccess: Bool
+    var skipLines: Bool
+    var entrantType: Entrants
+    var discounts: Discounts?
+    var areas: [ParkAreas]
+    var firstName: String?
+    var lastName: String?
+    var address: String?
+    var city: String?
+    var state: String?
+    var zipCode: String?
+    
+    init(firstName: String?, lastName: String?, address: String?, city: String?, state: String?, zipCode: String?) {
+        self.discounts = Discounts.SeasonPass
+        self.entrantType = Entrants.SeasonPass
+        self.areas = [ParkAreas.RideAreas]
+        self.firstName = firstName
+        self.lastName = lastName
+        self.address = address
+        self.city = city
+        self.zipCode = zipCode
+        self.state = state
+        self.rideAccess = true
+        self.skipLines = true
+    }
+    
+}
+
+class SeniorGuest: CanEnter {
+    var entrantType: Entrants
+    var discounts: Discounts?
+    var areas: [ParkAreas]
+    var firstName: String?
+    var lastName: String?
+    var dob: Date?
+    var skipLines: Bool
+    var rideAccess: Bool
+    
+    init(firstName: String?, lastName: String?, dob: Date?){
+        self.discounts = Discounts.SeniorGuest
+        self.entrantType = Entrants.SeniorPass
+        self.areas = [ParkAreas.RideAreas]
+        self.firstName = firstName
+        self.lastName = lastName
+        self.dob = dob
+        self.rideAccess = true
+        self.skipLines = true
+    }
+}
+
 
 class Employee: isEmployee, CanEnter {
-    
+    var skipLines: Bool = false
     
     var entrantType: Entrants
     var rideAccess: Bool = true
@@ -147,11 +198,10 @@ class HourlyFood : Employee {
         self.state = state
     }
 }
-
-class Manager : Employee {
-    init(firstName: String?, lastName: String?, address: String?, city: String?, state: String?, zipCode: String?) {
-        super.init(areas: [ParkAreas.RideAreas, ParkAreas.RideControlAreas, ParkAreas.KitchenAreas, ParkAreas.MaintenenceAreas, ParkAreas.OfficeAreas])
-        self.discounts = Discounts.ManagerDiscount
+class ContractEmp: Employee {
+     init(firstName: String?, lastName: String?, address: String?, city: String?, state: String?, zipCode: String?) {
+        super.init(areas: [ParkAreas.RideAreas, ParkAreas.KitchenAreas])
+        self.discounts = nil
         self.entrantType = Entrants.Employee
         self.firstName = firstName
         self.lastName = lastName
@@ -162,6 +212,44 @@ class Manager : Employee {
     }
 }
 
+class Manager : Employee {
+    init(firstName: String?, lastName: String?, address: String?, city: String?, state: String?, zipCode: String?) {
+        super.init(areas: [ParkAreas.RideAreas, ParkAreas.RideControlAreas, ParkAreas.KitchenAreas, ParkAreas.MaintenenceAreas, ParkAreas.OfficeAreas])
+        self.discounts = Discounts.ManagerDiscount
+        self.entrantType = Entrants.Manager
+        self.firstName = firstName
+        self.lastName = lastName
+        self.address = address
+        self.city = city
+        self.zipCode = zipCode
+        self.state = state
+    }
+}
+
+class Vendor : CanEnter {
+    var entrantType: Entrants
+    var discounts: Discounts?
+    var areas: [ParkAreas]
+    var firstName: String?
+    var lastName: String?
+    var dob: Date?
+    var dov: Date?
+    var company: String?
+    var skipLines: Bool = false
+    var rideAccess: Bool = false
+    
+    
+    init(firstName: String, lastName: String, company: String, dob: Date, dov: Date) {
+        self.firstName = firstName
+        self.lastName = lastName
+        self.company = company
+        self.dob = dob
+        self.dov = dov
+        self.entrantType = Entrants.Vendor
+        self.discounts = nil
+        self.areas = [ParkAreas.RideAreas, ParkAreas.KitchenAreas]
+    }
+}
 
 
 //MARK: ENUMS
@@ -171,18 +259,23 @@ enum Entrants {
     case Vip
     case Child
     case Employee
+    case Vendor
+    case Manager
+    case SeasonPass
+    case SeniorPass
+    case HourlyMaint
+    case HourlyFood
+    case HourlyRide
+    case Contract
 }
 
 enum Employees {
     case HourlyMaint
     case HourlyFood
     case HourlyRide
+    case Contract
 }
 
-enum rideAccess {
-    case skipLines
-    case allRides
-}
 
 enum ParkAreas {
     case RideAreas
@@ -196,6 +289,14 @@ enum Discounts {
     case VipDiscount
     case EmployeeDiscount
     case ManagerDiscount
+    case SeasonPass
+    case SeniorGuest
+    case None
+}
+
+enum SkipLines {
+    case NoSkip
+    case SkipAllLines
 }
 
 
@@ -205,6 +306,8 @@ protocol CanEnter {
     var entrantType: Entrants { get }
     var discounts: Discounts? { get }
     var areas: [ParkAreas] { get }
+    var rideAccess: Bool { get }
+    var skipLines: Bool { get }
 }
 
 protocol isChild {
