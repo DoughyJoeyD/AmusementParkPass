@@ -26,7 +26,7 @@ class PassViewController: UIViewController {
         guestFoodDiscountID.text = guestFoodDis
         officeButton.setTitle("Office", for: .normal)
         kitchenButton.setTitle("Kitchen", for: .normal)
-        rideButton.setTitle("Rides", for: .normal)
+        rideButton.setTitle("Skip Lines", for: .normal)
         rideControlButton.setTitle("Ride Control", for: .normal)
        foodButton.setTitle("Food Discount", for: .normal)
         merchButton.setTitle("Merch Discount", for: .normal)
