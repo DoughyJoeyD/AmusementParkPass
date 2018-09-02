@@ -7,10 +7,18 @@
 //
 
 import UIKit
-
+/*
+ Errors are thrown if data is incomplete, in the form of a dismisable popup.
+ THE UI DEFAULTS TO A CLASSIC PASS... I.E Guest w/ no other button highlighted(red)
+ 
+ */
 class ViewController: UIViewController {
     
+    // Acts as the Type Checker
     var selected: Entrants = Entrants.Classic
+    
+    @IBOutlet weak var popUpView: UIView!
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -26,7 +34,9 @@ class ViewController: UIViewController {
         streetTextField.delegate = self
         zipCodeTextField.delegate = self
         stateTextField.delegate = self
-        
+        popUpView.layer.cornerRadius = 10
+        popUpView.layer.masksToBounds = true
+        prettyButtons()
 
     }
     
@@ -34,10 +44,6 @@ class ViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    
-
-
-    
     
     //MARK: - Buttons
     
@@ -73,6 +79,7 @@ class ViewController: UIViewController {
     
     // Button Methods
     
+    //Disables all buttons
     func disableAll() {
         dobTextField.isEnabled = false
         ssnTextField.isEnabled = false
@@ -97,7 +104,7 @@ class ViewController: UIViewController {
         
 
     }
-    
+    //Sets button back to dark state
     func clearHighlight() {
         guestButton.setTitleColor(UIColor.white, for: .normal)
         employeeButton.setTitleColor(UIColor.white, for: .normal)
@@ -109,6 +116,7 @@ class ViewController: UIViewController {
         secondaryButton4.setTitleColor(UIColor.white, for: .normal)
         
     }
+    // Functions to determine which fields are displayed for each visitor type
     
     func childGuest() {
         dobTextField.isEnabled = true
@@ -191,6 +199,13 @@ class ViewController: UIViewController {
         secondaryButton2.isHidden = false
         secondaryButton3.isHidden = false
         secondaryButton4.isHidden = false
+    }
+    
+    func prettyButtons() {
+        generatePassButton.layer.cornerRadius = 10
+        populateDataButton.layer.cornerRadius = 10
+        continueButton.layer.cornerRadius = 10
+        backButton.layer.cornerRadius = 10
     }
     
     @IBAction func setGuestButtons(_ sender: Any) {
@@ -313,6 +328,7 @@ class ViewController: UIViewController {
         }
     }
     
+    //When the create Pass button is pushed
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let destVC = segue.destination as! PassViewController
@@ -464,6 +480,7 @@ class ViewController: UIViewController {
         }
     }
     
+    //Gives random data when pushed
     @IBAction func populateData(_ sender: Any) {
         if selected == Entrants.Child {
             dobTextField.text = "01/02/2002"
@@ -514,9 +531,272 @@ class ViewController: UIViewController {
         }
     }
     
+    // Popup Logic
+    
+    @IBOutlet weak var backButton: UIButton!
+    @IBOutlet weak var continueButton: UIButton!
+    @IBOutlet weak var secondaryInfoLabel: UILabel!
+    @IBOutlet weak var alertText: UILabel!
+    @IBOutlet weak var backgroundButton: UIButton!
+    
+    
+    
+    //Popup X constraint
+    @IBOutlet weak var popUpXConstraint: NSLayoutConstraint!
+    
+    
+    @IBAction func movePopup(_ sender: Any) {
+        popUpXConstraint.constant = -1000
+        backgroundButton.alpha = 0.0
+        UIView.animate(withDuration: 0.1, animations: {
+            self.view.layoutIfNeeded()
+        })
+    }
+    
+    func isValid() {
+        continueButton.isHidden = false
+    }
+    
+    @IBAction func showPopup(_ sender: Any) {
+        if selected == Entrants.Child {
+            if dobTextField.text != nil {
+                secondaryInfoLabel.text = "Creating Pass for Child"
+                alertText.text = "Creating pass with date \(dobTextField.text!)"
+                isValid()
+            }
+            if dobTextField.text == "" {
+                secondaryInfoLabel.text = "Missing DOB"
+                alertText.text = "Please enter a DOB in the DOB Field"
+                continueButton.isHidden = true
+            }
+        }
+        
+        if selected == Entrants.Classic {
+            secondaryInfoLabel.text = "Creating Classic Pass"
+            alertText.text = "Creating Classic Pass..."
+            isValid()
+        }
+        
+        if selected == Entrants.Vip {
+            secondaryInfoLabel.text = "Creating Vip Pass"
+            alertText.text = "Creating Vip Pass..."
+            isValid()
+        }
+        
+        //Employees logic
+        // Checks if the employee or seasonpass holder pass has all text fields filled
+        func empValid() -> Bool {
+            if firstNameTextField.text == "" && lastNameTextField.text == "" && streetTextField.text == "" && cityTextField.text == "" && stateTextField.text == "" && zipCodeTextField.text == "" {
+                secondaryInfoLabel.text = "Missing All Data Fields"
+                alertText.text = "Missing EveryField"
+                return false
+                
+            }
+            if firstNameTextField.text == "" {
+                secondaryInfoLabel.text = "Missing First Name Field"
+                alertText.text = "Please enter a first name"
+                return false
+            }
+            if lastNameTextField.text == "" {
+                secondaryInfoLabel.text = "Missing Last Name Field"
+                alertText.text = "Please enter a Last name"
+                return false
+            }
+            if stateTextField.text == "" {
+                secondaryInfoLabel.text = "Missing State Field"
+                alertText.text = "Please enter a State"
+                return false
+            }
+            if streetTextField.text == "" {
+                secondaryInfoLabel.text = "Missing Street Field"
+                alertText.text = "Please enter a Street Address"
+                return false
+            }
+            if zipCodeTextField.text == "" {
+                secondaryInfoLabel.text = "Missing ZipCode Field"
+                alertText.text = "Please enter a ZipCode"
+                return false
+                
+            }else {
+                alertText.text = "Creating a Employee Pass For: \(firstNameTextField.text!) \(lastNameTextField.text!)"
+                return true
+            }
+        }
+        
+        if selected == Entrants.HourlyMaint {
+            let validPass = empValid()
+            if validPass == true {
+                secondaryInfoLabel.text = "Creating Employee Maintenance Pass"
+                isValid()
+            }else {
+                continueButton.isHidden = true
+            }
+            
+            
+        }
+        
+        if selected == Entrants.HourlyRide {
+            let validPass = empValid()
+            if validPass == true {
+                secondaryInfoLabel.text = "Creating Employee Ride Pass"
+                isValid()
+            }else {
+                continueButton.isHidden = true
+            }
+        }
+        
+        if selected == Entrants.HourlyFood {
+            let validPass = empValid()
+            if validPass == true {
+                secondaryInfoLabel.text = "Creating Employee Food Pass"
+                isValid()
+            }else {
+                continueButton.isHidden = true
+            }
+        }
+        
+        if selected == Entrants.Manager {
+            let validPass = empValid()
+            if validPass == true {
+                secondaryInfoLabel.text = "Creating Manager Pass"
+                isValid()
+            }else {
+                continueButton.isHidden = true
+            }
+        }
+        
+        //VENDOR
+        if selected == Entrants.Vendor {
+            if firstNameTextField.text == "" && lastNameTextField.text == "" && companyTextField.text == "" {
+                secondaryInfoLabel.text = "Missing All Data Fields"
+                alertText.text = "Please Enter First and Last Name and a Company"
+                continueButton.isHidden = true
+            }
+            if firstNameTextField.text == "" {
+                secondaryInfoLabel.text = "Missing First Name"
+                alertText.text = "Please Enter A First Name"
+                continueButton.isHidden = true
+            }
+            if lastNameTextField.text == "" {
+                secondaryInfoLabel.text = "Missing Last Name"
+                alertText.text = "Please Enter A Last Name"
+                continueButton.isHidden = true
+            }
+            if companyTextField.text == "" {
+                secondaryInfoLabel.text = "Missing Company Info"
+                alertText.text = "Please Enter a Company Name"
+                continueButton.isHidden = true
+            }
+                
+            if companyTextField.text?.uppercased() != "FEDEX" && companyTextField.text?.uppercased() != "ACME" && companyTextField.text?.uppercased() != "ORKIN" && companyTextField.text?.uppercased() != "NW ELECTRICAL" {
+                secondaryInfoLabel.text = "NON VAILD COMPANY"
+                alertText.text = "Please Enter A Valid Company"
+                continueButton.isHidden = true
+            }
+                
+            else {
+                secondaryInfoLabel.text = "Creating Vendor Pass"
+                alertText.text = "Creating Pass for \(firstNameTextField.text!) \(lastNameTextField.text!)"
+                isValid()
+            }
+        }
+        
+        //Senior
+        if selected == Entrants.SeniorPass {
+            
+            if firstNameTextField.text == "" && lastNameTextField.text == "" && dobTextField.text == "" {
+                secondaryInfoLabel.text = "Missing All fields"
+                alertText.text = "Please Enter First Name, Last Name, and Dob"
+                continueButton.isHidden = true
+            }
+            if firstNameTextField.text == "" {
+                secondaryInfoLabel.text = "Missing First Name"
+                alertText.text = "Please Enter First Name"
+                continueButton.isHidden = true
+            }
+            if lastNameTextField.text == "" {
+                secondaryInfoLabel.text = "Missing Last Name"
+                alertText.text = "Please Enter Last Name"
+                continueButton.isHidden = true
+            }
+            if dobTextField.text == "" {
+                secondaryInfoLabel.text = "Missing Date of Birth"
+                alertText.text = "Please enter DOB Field"
+                continueButton.isHidden = true
+            }
+                
+            else {
+                secondaryInfoLabel.text = "Creating Senior Pass"
+                alertText.text = "Creating Senior Pass for \(firstNameTextField.text!) \(lastNameTextField.text!)"
+                isValid()
+            }
+            
+        }
+        
+        //Season Pass Holder
+        if selected == Entrants.SeasonPass {
+            let validPass = empValid()
+            if validPass == true {
+                secondaryInfoLabel.text = "Creating Season Pass"
+                alertText.text = "Creating Season Pass for \(firstNameTextField.text!) \(lastNameTextField.text!)"
+                isValid()
+            }else {
+                continueButton.isHidden = true
+            }
+        }
+        
+        //Contract Emp
+        if selected == Entrants.Contract {
+            if firstNameTextField.text == "" && lastNameTextField.text == "" && projectTextField.text == "" {
+                secondaryInfoLabel.text = "Missing All Data Fields"
+                alertText.text = "Please Enter First and Last Name and a Project #"
+                continueButton.isHidden = true
+            }
+            if firstNameTextField.text == "" {
+                secondaryInfoLabel.text = "Missing First Name"
+                alertText.text = "Please Enter A First Name"
+                continueButton.isHidden = true
+            }
+            if lastNameTextField.text == "" {
+                secondaryInfoLabel.text = "Missing Last Name"
+                alertText.text = "Please Enter A Last Name"
+                continueButton.isHidden = true
+            }
+            if projectTextField.text == "" {
+                secondaryInfoLabel.text = "Missing Project Field"
+                alertText.text = "Please Enter A Project Field"
+                continueButton.isHidden = true
+            }
+            if projectTextField.text != "1001" && projectTextField.text != "1002" && projectTextField.text != "1003" && projectTextField.text != "2001" && projectTextField.text != "2002" {
+                secondaryInfoLabel.text = "Non Vaild Project #"
+                alertText.text = "Please Enter a Vaild Prokject ID# "
+                continueButton.isHidden = true
+            }
+            else {
+                secondaryInfoLabel.text = "Creating Contract #\(projectTextField.text!) Pass"
+                alertText.text = "Creating Pass for \(firstNameTextField.text!) \(lastNameTextField.text!)"
+                isValid()
+            }
+        
+        }
+        
+        backgroundButton.alpha = 0.5
+        popUpXConstraint.constant = 0
+        UIView.animate(withDuration: 0.3, animations: {
+            self.view.layoutIfNeeded()
+        })
+    }
+    
+    @IBAction func backgroundMovePopup(_ sender: Any) {
+        popUpXConstraint.constant = -1000
+        backgroundButton.alpha = 0.0
+    }
+    
+    
 }
 
 extension ViewController : UITextFieldDelegate {
+    // Tracks the text in the textField after the user is done editing
     
     func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()

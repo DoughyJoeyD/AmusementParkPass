@@ -169,7 +169,7 @@ class PassViewController: UIViewController {
     @IBOutlet weak var testResultLabel: UILabel!
     
     
-    
+    //Makes the test view change based on the results
     func accessGranted() {
         testResultLabel.text = "Access Granted"
         testResultsView.backgroundColor = UIColor.green
